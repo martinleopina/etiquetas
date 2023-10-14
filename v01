@@ -1,0 +1,374 @@
+import tkinter as tk
+from tkinter import ttk
+from tkinter import messagebox
+from datetime import datetime
+import sqlite3
+import smtplib
+from email.mime.text import MIMEText
+
+
+
+
+# Variables globales
+ventana_autenticacion = None
+
+usuario=None
+contraseña=None
+
+usuario_entry = None  # Define usuario_entry como una variable global
+contraseña_entry = None  # Define contrasena_entry como una variable global
+
+# Base de datos de usuarios
+usuarios_db = 'usuarios.db'
+
+# Base de datos de etiquetas
+etiquetas_db = 'etiquetas.db'
+
+# Configuración de la aplicación
+app_name = 'Software de creación de etiquetas'
+app_version = '1.0'
+
+
+
+def abrir_ventana_autenticacion():
+    global ventana_autenticacion
+
+    # Verifica si la ventana de inicio de sesión ya está abierta
+    if ventana_autenticacion is not None:
+        # La ventana de inicio de sesión ya está abierta, por lo que la oculta
+        ventana_autenticacion.withdraw()
+    else:
+        # La ventana de inicio de sesión no está abierta, por lo que la crea
+        ventana_autenticacion = tk.Tk()
+        ventana_autenticacion.title("Iniciar sesión")
+        ventana_autenticacion.geometry("300x200")
+
+
+        # Campo de texto para el nombre de usuario
+        usuario_entry = ttk.Entry(ventana_autenticacion)
+        usuario_entry.pack()
+
+        # Campo de texto para la contraseña
+        contraseña_entry = ttk.Entry(ventana_autenticacion, show="*")
+        contraseña_entry.pack()
+
+        # Botón para iniciar sesión
+        iniciar_sesion_button = ttk.Button(ventana_autenticacion, text="Iniciar sesión", command=lambda: iniciar_sesion(usuario_entry.get(), contraseña_entry.get()))
+
+        iniciar_sesion_button.pack()
+
+        # Muestra la ventana de autenticación
+        ventana_autenticacion.mainloop()
+
+        return ventana_autenticacion
+        return usuario_entry
+
+def iniciar_sesion(usuario, contraseña):
+# Verifica las credenciales en la base de datos
+    conn = sqlite3.connect(usuarios_db)
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM usuarios WHERE username=? AND password=?', (usuario, contraseña))
+    resultado = cursor.fetchone()
+    conn.close()
+
+    if resultado is not None:
+        # Las credenciales son correctas
+        ventana_autenticacion.destroy()
+        abrir_ventana_principal(usuario, contraseña)
+
+    else:
+        # Las credenciales son incorrectas
+        messagebox.showerror("Error", "Credenciales incorrectas")
+        ventana_autenticacion.destroy()
+
+
+def autenticar_usuario(usuario, contraseña):
+    # Conéctate a la base de datos de usuarios (si no existe, la crea)
+    conn = sqlite3.connect(usuarios_db)
+    cursor = conn.cursor()
+
+    # Verifica las credenciales en la base de datos
+    cursor.execute('SELECT * FROM usuarios WHERE username=? AND password=?', (usuario, contraseña))
+    resultado = cursor.fetchone()
+
+    conn.close()  # Cierra la conexión con la base de datos
+
+    if resultado:
+        return True  # Las credenciales son correctas
+    else:
+        return False  # Las credenciales son incorrectas
+
+
+# Función para registrar un nuevo usuario
+def registrar_usuario():
+    usuario = usuario_entry.get()
+    contraseña = contraseña_entry.get()
+
+    # Verifica que el nombre de usuario no esté ya en uso
+    conn = sqlite3.connect(usuarios_db)
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM usuarios WHERE username=?', (usuario,))
+    resultado = cursor.fetchone()
+    conn.close()
+
+    if resultado is not None:
+        messagebox.showerror("Error", "El nombre de usuario ya está en uso")
+        return
+
+    # Inserta el nuevo usuario en la base de datos
+    conn = sqlite3.connect(usuarios_db)
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO usuarios (username, password) VALUES (?, ?)', (usuario, contraseña))
+    conn.commit()
+    conn.close()
+
+    # Muestra un mensaje de éxito
+    messagebox.showinfo("Éxito", "Usuario registrado con éxito")
+    ventana_registro.destroy()
+
+
+
+
+
+# Función para abrir la ventana de registro de usuarios
+def abrir_ventana_registro(usuario_entry, contraseña_entry):
+    global ventana_registro
+    ventana_registro = tk.Toplevel(ventana_principal)
+    ventana_registro.title("Registro de Usuario")
+    ventana_registro.geometry("300x200")  # Establece el ancho a 300 píxeles y el alto a 200 píxeles
+
+    # Etiquetas para el nombre de usuario y la contraseña
+    usuario_label = ttk.Label(ventana_registro, text="Nombre de usuario:")
+    usuario_label.pack()
+    contraseña_label = ttk.Label(ventana_registro, text="Contraseña:")
+    contraseña_label.pack()
+
+    # Campos de texto para el nombre de usuario y la contraseña
+    usuario_entry = ttk.Entry(ventana_registro)
+    usuario_entry.pack()
+    contraseña_entry = ttk.Entry(ventana_registro, show="*")
+    contraseña_entry.pack()
+
+    # Botón para registrar el usuario
+    registrar_button = ttk.Button(ventana_registro, text="Registrar", command=registrar_usuario)
+    registrar_button.pack()
+
+
+
+
+# Función para validar los datos de entrada
+def validar_datos(datos):
+    # Valida que los datos sean alfanuméricos
+    if not datos.isalnum():
+        raise ValueError("Los datos deben ser alfanuméricos")
+
+    # Valida que el nombre de la etiqueta no sea vacío
+    if datos == "":
+        raise ValueError("El nombre de la etiqueta no puede estar vacío")
+
+
+
+def abrir_etiqueta():
+    # Código para abrir la etiqueta
+    pass
+
+def guardar_etiqueta():
+    # Código para guardar la etiqueta
+    pass
+
+def salir():
+    # Código para salir de la aplicación
+    pass
+
+def mostrar_ayuda():
+    # Código para mostrar la ayuda
+    pass
+
+def mostrar_acerca_de():
+    # Código para mostrar la información acerca de la aplicación
+    pass
+
+def crear_etiqueta():
+    # Código para crear una etiqueta
+    pass
+
+# editar_etiqueta.py
+def editar_etiqueta():
+    # Código para editar una etiqueta
+    pass
+
+def eliminar_etiqueta():
+    # Código para eliminar una etiqueta
+    pass
+
+def cargar_imagen():
+    # Código para cargar una imagen
+    pass
+
+def cerrar_imagen():
+    # Código para cerrar la ventana de la imagen
+    pass
+
+def crear_etiqueta():
+    # Código para crear una etiqueta
+    pass
+
+
+
+
+def abrir_ventana_principal(usuario, contraseña):
+
+
+    # Crea la ventana principal
+    ventana_principal = tk.Tk()
+    ventana_principal.title(app_name)
+    ventana_principal.geometry("800x600")
+    
+    # Menú principal
+    menu_bar = tk.Menu(ventana_principal)
+    ventana_principal.config(menu=menu_bar)
+
+    # Agrega el menú de archivo
+    archiv_menu = tk.Menu(menu_bar, tearoff=0)
+    archiv_menu.add_command(label="Abrir", command=abrir_etiqueta)
+    archiv_menu.add_command(label="Guardar", command=guardar_etiqueta)
+    archiv_menu.add_command(label="Salir", command=salir)
+    menu_bar.add_cascade(label="Archivo", menu=archiv_menu)
+
+    ayuda_menu = tk.Menu(menu_bar, tearoff=0)
+    ayuda_menu.add_command(label="Ayuda", command=mostrar_ayuda)
+    ayuda_menu.add_command(label="Acerca de", command=mostrar_acerca_de)
+    menu_bar.add_cascade(label="Ayuda", menu=ayuda_menu)
+
+    # Etiquetas para el nombre de la etiqueta y la descripción
+    nombre_etiqueta_label = ttk.Label(ventana_principal, text="Nombre de la etiqueta:")
+    nombre_etiqueta_label.pack()
+    descripción_etiqueta_label = ttk.Label(ventana_principal, text="Descripción:")
+    descripción_etiqueta_label.pack()
+
+    # Campos de texto para el nombre de la etiqueta y la descripción
+    nombre_etiqueta_entry = ttk.Entry(ventana_principal)
+    nombre_etiqueta_entry.pack()
+    descripción_etiqueta_entry = ttk.Entry(ventana_principal)
+    descripción_etiqueta_entry.pack()
+
+    # Botón para crear una nueva etiqueta
+    crear_etiqueta_button = ttk.Button(ventana_principal, text="Crear etiqueta", command=crear_etiqueta)
+    crear_etiqueta_button.pack()
+
+    # Listbox para mostrar las etiquetas
+    etiquetas_listbox = tk.Listbox(ventana_principal)
+    etiquetas_listbox.pack()
+
+    # Botón para editar una etiqueta
+    editar_etiqueta_button = ttk.Button(ventana_principal, text="Editar etiqueta", command=editar_etiqueta)
+    editar_etiqueta_button.pack()
+
+    # Botón para eliminar una etiqueta
+    eliminar_etiqueta_button = ttk.Button(ventana_principal, text="Eliminar etiqueta", command=eliminar_etiqueta)
+    eliminar_etiqueta_button.pack()
+
+    # Ventana de imagen
+    #ventana_imagen = tk.Toplevel(ventana_principal)
+    #ventana_imagen.title("Imagen de la etiqueta")
+    #ventana_imagen.geometry("400x400")
+
+    # Etiqueta para la imagen
+    #imagen_label = tk.Label(ventana_imagen)
+    #imagen_label.pack()
+
+    # Botón para cargar una imagen
+    #cargar_imagen_button = ttk.Button(ventana_imagen, text="Cargar imagen", command=cargar_imagen)
+    #cargar_imagen_button.pack()
+
+    # Botón para cerrar la ventana de imagen
+    #cerrar_imagen_button = ttk.Button(ventana_imagen, text="Cerrar", command=cerrar_imagen)
+    
+    archiv_menu.add_command(label="Abrir", command=abrir_etiqueta)
+    archiv_menu.add_command(label="Guardar", command=guardar_etiqueta)
+    archiv_menu.add_command(label="Salir", command=salir)
+
+    ayuda_menu = tk.Menu(ventana_principal, tearoff=0)
+    ayuda_menu.add_command(label="Ayuda", command=mostrar_ayuda)
+    ayuda_menu.add_command(label="Acerca de", command=mostrar_acerca_de)
+    ventana_principal.config(menu=ayuda_menu)
+
+    crear_etiqueta_button = ttk.Button(ventana_principal, text="Crear etiqueta", command=crear_etiqueta)
+    crear_etiqueta_button.pack()
+
+    editar_etiqueta_button = ttk.Button(ventana_principal, text="Editar etiqueta", command=editar_etiqueta)
+    editar_etiqueta_button.pack()
+
+    eliminar_etiqueta_button = ttk.Button(ventana_principal, text="Eliminar etiqueta", command=eliminar_etiqueta)
+    eliminar_etiqueta_button.pack()
+
+    cargar_imagen_button = ttk.Button(ventana_principal, text="Cargar imagen", command=cargar_imagen)
+    cargar_imagen_button.pack()
+
+
+    #cerrar_imagen_button = ttk.Button(ventana_imagen, text="Cerrar", command=cerrar_imagen)
+    #cerrar_imagen_button.pack()
+
+    # Inicia la ventana principal
+    ventana_principal.mainloop()
+
+    #ventana_imagen = tk.Toplevel(ventana_principal)
+    #ventana_imagen.title("Imagen")
+    #ventana_imagen.geometry("400x300")
+
+
+if __name__ == "__main__":
+    # Obtiene el nombre de usuario y la contraseña del usuario
+    usuario = "admin"
+    contraseña = "password"
+
+    ventana_autenticacion = abrir_ventana_autenticacion()
+
+    # Verifica la autenticación del usuario
+    if not autenticar_usuario(usuario, contraseña):
+        ventana_autenticacion.mainloop()
+
+
+'''def main():
+    # Inicializa la base de datos de etiquetas
+    conn = sqlite3.connect(etiquetas_db)
+    conn.execute('CREATE TABLE IF NOT EXISTS etiquetas (numero_correlativo INTEGER NOT NULL, nombre VARCHAR(255) NOT NULL, descripción VARCHAR(255) NOT NULL, fecha DATE NOT NULL)')
+    conn.close()
+
+    # Abre la ventana de inicio de sesión
+    ventana_autenticacion = abrir_ventana_autenticacion()
+    ventana_autenticacion.mainloop()
+
+    # Verifica si el usuario ya está autenticado
+    if ventana_autenticacion is None:
+        # El usuario ya está autenticado, por lo que abre la ventana principal
+        abrir_ventana_principal()
+
+'''
+
+
+# Función para buscar etiquetas
+def buscar_etiquetas(texto):
+    # Obtiene las etiquetas que coinciden con el texto de búsqueda
+    resultados = []
+    conn = sqlite3.connect(etiquetas_db)
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM etiquetas WHERE nombre LIKE ?', (f'%{texto}%',))
+    for etiqueta in cursor.fetchall():
+        resultados.append(etiqueta)
+    conn.close()
+
+    return resultados
+
+
+# Función para exportar etiquetas a un archivo
+def exportar_etiquetas(etiquetas, archivo):
+    # Crea un archivo CSV
+    with open(archivo, 'w', newline='') as f:
+        # Escribe las etiquetas en el archivo CSV
+        escritor = csv.writer(f)
+        escritor.writerow(['Número correlativo', 'Nombre', 'Descripción', 'Fecha'])
+        for etiqueta in etiquetas:
+            escritor.writerow(etiqueta)
+
+
